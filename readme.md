@@ -13,6 +13,57 @@ then, define the deployed starknet wallet contract that we are gonna use (and po
 ```
 export STARKNET_WALLET=starkware.starknet.wallets.open_zeppelin.OpenZeppelinAccount
 ```
+---
+## Getting ready from the cairo basecamp
+(They shared this doc after the basecamp: https://docs.google.com/document/d/e/2PACX-1vQO7MSt_JINcGItO4-aIH-FQE9xN_Ssa6zQXC93f0e7W5g7ECny57w3E2M9-fdTdU5Ne1R-Kt9g8_EB/pub)
+1. Install rust:
+    ```
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+    ```
+2. Get cairo-lang (python cli) for creating account, declaring, deploying and invoking contracts (python tool seems to only support 0.x cairo):
+    ```
+    pip3 install cairo-lang
+    ```
+2. Compile Cairo compiler from source (rust lib which is able to compile cairo 1.x)
+    ```
+    git clone https://github.com/starkware-libs/cairo
+    cd cairo
+    git checkout tags/v1.0.0-alpha.6
+    cargo build --all --release
+    ```
+    Now add the binaries to your path:
+    ```
+    echo 'export PATH="$HOME/.cairo/target/release:$PATH"' >> ~/.zshrc
+    ```
+    And test it:
+    ```
+    starknet-compile --version
+    ```
+    It should returns something like that:
+    ```
+    cairo-lang-starknet 1.0.0-alpha.6 
+    ```
+    Now if you want to compile a cairo contract:
+    ```
+    starknet-compile file.cairo file.json
+    ```
+    If you want the vscode extension, install nodejs and then go to the correct directory to compile it:
+    ```
+    cd $HOME/.cairo/vscode-cairo
+    ```
+    then install dependencies:
+    ```
+    npm i
+    ```
+    compile the package:
+    ```
+    vsce package
+    ```
+    Then go to vscode and go the settings of your new extension (Cairo 1.0) and put the right PATH for the compiler, here is mine:
+    ```
+    /Users/blabla/.cairo/target/release/cairo-language-server
+    ```
+
 ___
 ## Create an account
 You can get some doc [here](https://github.com/starknet-edu/deploy-cairo1-demo) too.
@@ -53,4 +104,43 @@ differently.
 ___
 ## Fun facts
 
-There’s no way for sequencers to verify correctness of ABI submitted on deployment. Which means that you can fake it on the deployment and have a fake ABI verified on Starknet explorer.
+There’s no way for sequencers to verify correctness of ABI submitted on deployment. Which means that you can fake it on the deployment and have a fake ABI verified on Starknet explorer.  
+It’s actually pretty intuitive that you cannot possibly verify the correctness of ABI without access to contract source code. Thus the sequencer cannot possibly verify it.
+___
+## Dev tools
+
+nile is a cli framework to simplify starknet dev, but it seems outdates and doesn't work anymore with cairo 1.0
+https://github.com/OpenZeppelin/nile
+---
+## Videos
+- Starknet session 1 (fundamental) :  
+    https://www.youtube.com/watch?v=NdP2jTQ34hY  
+
+    https://docs.google.com/presentation/d/e/2PACX-1vRpos6yyrEn1WHz1iHpCWe7Ha0F7DEtiwM3pHYlk2S3S6h5rV4dTwhQvbcWeiBfld_kBF51XibeTUFy/pub?start=false&loop=false&delayms=3000&slide=id.g22d0d34fde7_0_7
+
+    What we learn here is:
+    - that cairo permits you to generate a crypographic proof that can proove the execution validity of your code.
+
+    - Starknet uses Cairo programs and it's not about privacy but scalability
+
+    - Starknet uses STARKs which are quantum resistants (SNARKs aren't), have a proof size which is about `400kb` (SNARKS have a 288 bytes so they are better on that) and have verification complexity of log^2(n) instead of a constant one for SNARKs
+
+    - It made sense to me because Ethereum will be quantum resistant in the future
+
+    - Architecture:
+        - Sequencer: Validates, executes and bundle txs into blocks (so you send your bytecode in Sierra (Sierra = Safe intermediate representation) which allow reverted tx to the sequencer that will compile it to CASM cairo assembly)
+        - Prover: Creates STARK proofs for Starknet and StarkEx (SHARP) 
+        - Verifier: Ll smart contract that verifies STARK proofs from SHARP 
+        - Starknet Core: L1 smart contract that store changes to L2 global state (DA) 
+        - Full Node: Provide data to L2 dapps 
+
+    - Code:
+        - You declare the attributes into a struct named "`Storage`"
+        - You can read value frolm this storage with the function with _`attribute`_**`::read()`**
+        - You can write on the storage with _*`attribute`_**`::write(`**_`new value`_**`)`**
+
+    - Tools:
+        - Protostar is a dev toolchain (I will test it further later)
+
+
+
