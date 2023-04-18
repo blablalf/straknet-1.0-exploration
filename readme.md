@@ -141,6 +141,7 @@ https://github.com/OpenZeppelin/nile
 
     - Tools:
         - Protostar is a dev toolchain (I will test it further later)
+        - scarb (super updated): install it with these instructions (https://docs.swmansion.com/scarb/download) from this repo https://github.com/software-mansion/scarb/releases and don't forget to add the bin folder to the path by adding this to your terminal profile `export PATH="$HOME/.scarb/bin:$PATH"`
 
 
 
